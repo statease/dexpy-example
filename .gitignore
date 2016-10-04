@@ -1,0 +1,7 @@
+# waf intermediate files
+.lock-waf*
+waf3-*
+.waf3-*
+.waf-*
+waf.cache.*
+build
