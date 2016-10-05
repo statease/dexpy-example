@@ -8,9 +8,14 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_cxx')
-    dexpy_env_path = os.path.join(os.path.expanduser("~"), ".dex_dependencies/install/miniconda/envs/dexpy_env")
+
+    dependency_path = os.path.join(os.path.expanduser("~"), ".dex_dependencies/install")
+    dexpy_env_path = os.path.join(dependency_path, "miniconda/envs/dexpy_env")
+
     conf.env["INCLUDES_DEXPY_ENV"] = os.path.join(dexpy_env_path, "include")
     conf.env["LIB_DEXPY_ENV"] = os.path.join(dexpy_env_path, "libs/python34")
 
+    conf.env["INCLUDES_PYBIND11"] = os.path.join(dependency_path, "pybind11/include")
+
 def build(bld):
-    bld.program(source="main.c", target="main", use="DEXPY_ENV")
+    bld.program(source="main.cpp", target="main", use=["DEXPY_ENV", "PYBIND11"])
