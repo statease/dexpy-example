@@ -9,14 +9,17 @@ public:
 
 class GridFrame : public wxFrame
 {
-    wxGrid* grid;
-    wxTextCtrl* logWin;
-    wxButton* startButton;
-    wxLogTextCtrl* logger;
-
 public:
     GridFrame();
     ~GridFrame();
 
-    wxLog *m_logOld;
+    wxLog* mLogOld;
+
+private:
+    void OnStart(wxCommandEvent& /*inEvent*/);
+
+    wxGrid* mGrid;
+    wxTextCtrl* mLogWin;
+    wxButton* mStartButton;
+    wxLogTextCtrl* mLogger;
 };

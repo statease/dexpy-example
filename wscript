@@ -51,7 +51,6 @@ def build(bld):
     # bld.shlib(source="examples/filtrate.py", features="py")
 
     dexpy_sources = [
-        "dexpy_example.cpp",
         "examples/filtrate.cpp",
         "dexpy_grid.cpp",
     ]

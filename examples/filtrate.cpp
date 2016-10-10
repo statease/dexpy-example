@@ -11,7 +11,7 @@
 /**
  * Runs the Filtrate example via python packages.
  */
-void run_filtrate_example()
+std::vector<std::vector<std::string>> run_filtrate_example()
 {
     namespace pb = pybind11;
 
@@ -90,4 +90,9 @@ void run_filtrate_example()
 
     auto mplModule = pb::module::import("matplotlib.pyplot");
     mplModule.attr("show").call();
+
+    std::vector<std::vector<std::string>> dummyOut;
+    dummyOut.push_back({ "A", "B", "C" });
+    dummyOut.push_back({ "1", "2", "3" });
+    return dummyOut;
 }
