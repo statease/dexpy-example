@@ -54,8 +54,15 @@ void run_filtrate_example()
     std::cout << "regression matrix: " << ols_data.str() << std::endl;
     auto statsModelModule = pb::module::import("statsmodels.formula.api");
     auto lmFunc = statsModelModule.attr("ols");
-    auto lm = pb::handle(lmFunc.call("R1 ~ " + model, ols_data)).call("fit");
-    std::cout << lm.call("summary").str() << std::endl;
+    // This is a bit confusing: we need to pass in eval_env = -1 here, because
+    // patsy tries to capture local variables from the stack using inspect
+    // and it takes a paraemter for how far up the stack to walk
+    // if we don't specify a depth to statsmodels it will use an incorrect
+    // depth resulting in an error in the patsy capture function that looks
+    // something like: "'NoneType' object has no attribute 'f_locals'" -hpa
+    auto olsFunc = lmFunc.call("R1 ~ " + model, ols_data, pb::arg("eval_env") = -1);
+    auto lm = olsFunc.attr("fit").call();
+    std::cout << lm.attr("summary").call().str() << std::endl;
 
     end = std::chrono::high_resolution_clock::now();
 
