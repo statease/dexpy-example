@@ -4,6 +4,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 
 #include <iostream>
 #include <chrono>
@@ -91,8 +92,21 @@ std::vector<std::vector<std::string>> run_filtrate_example()
     auto mplModule = pb::module::import("matplotlib.pyplot");
     mplModule.attr("show").call();
 
-    std::vector<std::vector<std::string>> dummyOut;
-    dummyOut.push_back({ "A", "B", "C" });
-    dummyOut.push_back({ "1", "2", "3" });
-    return dummyOut;
+    pb::array_t<double> anovaValues = table.attr("values");
+    auto anovaCols = pb::cast<std::vector<std::string>>(table.attr("columns").attr("values").attr("tolist").call());
+    auto anovaRows = pb::cast<std::vector<std::string>>(table.attr("index").attr("values").attr("tolist").call());
+
+    std::vector<std::vector<std::string>> out;
+    out.push_back(anovaCols);
+    out[0].insert(out[0].begin(), ""); // blank cell at top left
+    for (size_t r = 0; r < anovaRows.size(); ++r) {
+        std::vector<std::string> row;
+        row.push_back(anovaRows[r]);
+        for (size_t c = 0; c < anovaCols.size(); ++c) {
+            row.push_back(std::to_string(anovaValues.at(r, c)));
+        }
+        out.push_back(row);
+    }
+
+    return out;
 }
