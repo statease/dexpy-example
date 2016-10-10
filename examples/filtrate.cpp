@@ -1,3 +1,7 @@
+#define WXINTL_NO_GETTEXT_MACRO // pybind11 has a _ function, which this macro breaks
+
+#include <wx/wxprec.h>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -11,15 +15,17 @@ void run_filtrate_example()
 {
     namespace pb = pybind11;
 
-    int factor_count = 4;
-    int run_count = (int)pow(2, factor_count);
+    wxLogMessage("%s", "starting demo of filtrate example");
+
+    int factorCount = 4;
+    int runCount = (int)pow(2, factorCount);
 
     auto dexpyModule = pb::module::import("dexpy");
 
     auto start = std::chrono::high_resolution_clock::now();
 
     auto dexpyFunc = dexpyModule.attr("build_factorial");
-    auto design = pb::handle(dexpyFunc).call(factor_count, run_count);
+    auto design = pb::handle(dexpyFunc).call(factorCount, runCount);
 
     std::vector<int> filtrate_data { 45, 43, 68, 75, 48, 45, 80, 70, 71, 100, 60, 86, 65, 104, 65, 96 };
     std::vector<std::string> responseNames = { "R1" };
@@ -28,11 +34,11 @@ void run_filtrate_example()
 
     auto end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "time to build " << factor_count << " factor " << run_count << " run factorial: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
+    wxLogMessage("time to build %d factor %d run factorial: %fs", factorCount, runCount, std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::high_resolution_clock::now();
 
-    //int max_order = factor_count - 1;
+    //int max_order = factorCount - 1;
     std::string model = "A + C + D + A:C + A:D";
 
     auto modelMatrixFunc = design.attr("create_model_matrix");
@@ -49,9 +55,9 @@ void run_filtrate_example()
     std::cout << "time to calculate power: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
-    auto ols_data = design.attr("factor_data");
-    ols_data = ols_data.attr("join").call(design.attr("response_data"));
-    std::cout << "regression matrix: " << ols_data.str() << std::endl;
+    auto olsData = design.attr("factor_data");
+    olsData = olsData.attr("join").call(design.attr("response_data"));
+    std::cout << "regression matrix: " << olsData.str() << std::endl;
     auto statsModelModule = pb::module::import("statsmodels.formula.api");
     auto lmFunc = statsModelModule.attr("ols");
     // This is a bit confusing: we need to pass in eval_env = -1 here, because
@@ -60,7 +66,7 @@ void run_filtrate_example()
     // if we don't specify a depth to statsmodels it will use an incorrect
     // depth resulting in an error in the patsy capture function that looks
     // something like: "'NoneType' object has no attribute 'f_locals'" -hpa
-    auto olsFunc = lmFunc.call("R1 ~ " + model, ols_data, pb::arg("eval_env") = -1);
+    auto olsFunc = lmFunc.call("R1 ~ " + model, olsData, pb::arg("eval_env") = -1);
     auto lm = olsFunc.attr("fit").call();
     std::cout << lm.attr("summary").call().str() << std::endl;
 

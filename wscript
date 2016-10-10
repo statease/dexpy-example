@@ -34,12 +34,31 @@ def configure(conf):
 
         conf.env["INCLUDES_PYBIND11"] = os.path.join(dependency_path, "pybind11/include")
 
+        # these are the libs used by dex11, definitely not all needed here but I don't want to bother sorting them out
+        conf.env["INCLUDES_WXWIDGETS"] = [os.path.join(dependency_path, "wxWidgets/include") , os.path.join(dependency_path, "wxWidgets/lib/vc_x64_lib/mswu")]
+        conf.env["LIB_WXWIDGETS"] = [ "wxmsw31u_aui", "wxmsw31u_adv", "wxbase31u", "wxmsw31u_core", "wxmsw31u_html", "wxmsw31u_propgrid", "wxmsw31u_stc", "wxmsw31u_webview", "wxbase31u_xml", "wxmsw31u_xrc", "wxscintilla", "wxpng", "wxtiff", "wxjpeg", "wxzlib", "wxregexu", "wxexpat"]
+        conf.env["LIBPATH_WXWIDGETS"] = os.path.join(dependency_path, "wxWidgets/lib/vc_x64_lib")
+
+        conf.env['DEXPY_SYSTEM_LIBS'] = [ "gdi32", "winspool", "shell32", "ole32", "oleaut32", "comdlg32", "advapi32", "wininet", "winhttp", "user32", "ws2_32", "winmm", "comctl32", "rpcrt4", "wsock32" ]
+
+        conf.check_libs_msvc(conf.env['DEXPY_SYSTEM_LIBS'], mandatory=True)
+
         _set_cxx_flags(conf)
 
 def build(bld):
 
-    # this compiles a py file to pyc bld.shlib(source="examples/filtrate.py", features="py")
-    bld.program(source=["main.cpp", "examples/filtrate.cpp"], target="main", use=["DEXPY_ENV", "PYBIND11"])
+    # this compiles a py file to pyc
+    # bld.shlib(source="examples/filtrate.py", features="py")
+
+    dexpy_sources = [
+        "dexpy_example.cpp",
+        "examples/filtrate.cpp",
+        "dexpy_grid.cpp",
+    ]
+
+    dexpy_libs = ["DEXPY_ENV", "PYBIND11", "WXWIDGETS"]
+    dexpy_libs.extend([x.upper() for x in bld.env['DEXPY_SYSTEM_LIBS']])
+    bld.program(source=dexpy_sources, target="dexpy_example", use=dexpy_libs)
 
 def _set_cxx_flags(ctx):
 
@@ -64,10 +83,7 @@ def _set_cxx_flags(ctx):
         ]
 
         # set the minimum version (5.01 is XP, 5.02 is XP64)
-        if "x86" in ctx.variant:
-            ctx.env.LINKFLAGS.append("/SUBSYSTEM:CONSOLE,5.01")
-        else:
-            ctx.env.LINKFLAGS.append("/SUBSYSTEM:CONSOLE,5.02")
+        ctx.env.LINKFLAGS.append("/SUBSYSTEM:WINDOWS,5.02")
 
         if "debug" in ctx.variant:
 
