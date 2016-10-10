@@ -69,12 +69,14 @@ void run_filtrate_example()
     std::cout << "time to calculate fit: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
-    //table = sm.stats.anova_lm(lm, typ=2)
+    auto statsModule = pb::module::import("statsmodels.api");
+    // N.B. no 'e' on the 'typ' arg (controlls the sums of squares output)
+    auto table = statsModule.attr("stats").attr("anova_lm").call(lm, pb::arg("typ") = 2);
     end = std::chrono::high_resolution_clock::now();
 
     std::cout << "time to calculate anova: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
 
-    //print(table)
+    std::cout << table.str() << std::endl;
 
     /*residual_df = X.shape[0] - X.shape[1]
     dexpy.plot_pareto(lm.params, lm.bse, residual_df)
