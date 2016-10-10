@@ -78,7 +78,10 @@ void run_filtrate_example()
 
     std::cout << table.str() << std::endl;
 
-    /*residual_df = X.shape[0] - X.shape[1]
-    dexpy.plot_pareto(lm.params, lm.bse, residual_df)
-    #pp.show()*/
+    auto xShape = pb::cast<std::tuple<int, int>>(X.attr("shape"));
+    int residual_df = std::get<0>(xShape) - std::get<1>(xShape);
+    dexpyModule.attr("plot_pareto").call(lm.attr("params"), lm.attr("bse"), residual_df);
+
+    auto mplModule = pb::module::import("matplotlib.pyplot");
+    mplModule.attr("show").call();
 }

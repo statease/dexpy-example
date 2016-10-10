@@ -24,7 +24,8 @@ int main(int /*argc*/, char* /*argv[]*/)
     try
     {
         /*pb::module mainModule = pb::module::import("__main__");
-        pb::object mainNamespace = mainModule.attr("__dict__");*/
+        pb::object mainNamespace = mainModule.attr("__dict__");
+        pb::eval_file("../examples/filtrate.py", mainNamespace);*/
         run_filtrate_example();
 
     } catch (pb::error_already_set& e)
