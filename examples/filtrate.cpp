@@ -45,19 +45,19 @@ void run_filtrate_example()
     auto X = modelMatrixFunc.call(model);
     end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "time to generate X matrix: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
+    wxLogMessage("time to generate X matrix: %fs", std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::high_resolution_clock::now();
     auto power = pb::handle(dexpyModule.attr("f_power")).call(model, X, 2, 0.05);
-    std::cout << "power: " << power.str() << std::endl;
+    wxLogMessage("power: %s", (std::string)power.str());
     end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "time to calculate power: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
+    wxLogMessage("time to calculate power: %fs", std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::high_resolution_clock::now();
     auto olsData = design.attr("factor_data");
     olsData = olsData.attr("join").call(design.attr("response_data"));
-    std::cout << "regression matrix: " << olsData.str() << std::endl;
+    wxLogMessage("regression matrix: %s", (std::string)olsData.str());
     auto statsModelModule = pb::module::import("statsmodels.formula.api");
     auto lmFunc = statsModelModule.attr("ols");
     // This is a bit confusing: we need to pass in eval_env = -1 here, because
@@ -68,11 +68,11 @@ void run_filtrate_example()
     // something like: "'NoneType' object has no attribute 'f_locals'" -hpa
     auto olsFunc = lmFunc.call("R1 ~ " + model, olsData, pb::arg("eval_env") = -1);
     auto lm = olsFunc.attr("fit").call();
-    std::cout << lm.attr("summary").call().str() << std::endl;
+    wxLogMessage("%s", (std::string)lm.attr("summary").call().str());
 
     end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "time to calculate fit: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
+    wxLogMessage("time to calculate fit: %fs", std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::high_resolution_clock::now();
     auto statsModule = pb::module::import("statsmodels.api");
@@ -80,9 +80,9 @@ void run_filtrate_example()
     auto table = statsModule.attr("stats").attr("anova_lm").call(lm, pb::arg("typ") = 2);
     end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "time to calculate anova: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
+    wxLogMessage("time to calculate anova %fs", std::chrono::duration<double>(end - start).count());
 
-    std::cout << table.str() << std::endl;
+    wxLogMessage("%s", (std::string)table.str());
 
     auto xShape = pb::cast<std::tuple<int, int>>(X.attr("shape"));
     int residual_df = std::get<0>(xShape) - std::get<1>(xShape);
